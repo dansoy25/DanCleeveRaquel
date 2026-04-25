@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dan Cleeve Raquel — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --violet-1:#8b5cf6;
+    --violet-2:#a855f7;
+    --violet-3:#6d28d9;
+    --neon:#c4b5fd;
+    --deep:#0a0418;
+    --deep-2:#13072b;
+    --ink:#f5f3ff;
+    --muted:#b9a9e6;
+    --glass:rgba(139,92,246,0.10);
+    --glass-bd:rgba(196,181,253,0.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    color:var(--ink);
+    background:radial-gradient(1200px 800px at 80% -10%,#2a0a55 0%,transparent 60%),
+               radial-gradient(900px 600px at -10% 60%,#3c0a6b 0%,transparent 55%),
+               linear-gradient(180deg,#05010f 0%, #0a0418 50%, #05010f 100%);
+    min-height:100vh;
+    overflow-x:hidden;
+    cursor:none;
+  }
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;display:block}
+
+  /* ===== Custom Cursor ===== */
+  .cursor-dot,.cursor-ring{
+    position:fixed;top:0;left:0;pointer-events:none;z-index:9999;
+    transform:translate(-50%,-50%);will-change:transform;
+  }
+  .cursor-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--violet-1);
+    box-shadow:0 0 16px var(--violet-1),0 0 32px var(--violet-2);
+    transition:opacity .2s;
+  }
+  .cursor-ring{
+    width:42px;height:42px;border-radius:50%;
+    border:1.5px solid rgba(196,181,253,0.55);
+    backdrop-filter:blur(2px);
+    transition:width .25s ease, height .25s ease, border-color .25s ease, background .25s ease, transform .15s ease;
+  }
+  .cursor-ring.hover{
+    width:70px;height:70px;
+    border-color:var(--violet-1);
+    background:radial-gradient(circle,rgba(139,92,246,0.18) 0%,rgba(139,92,246,0) 70%);
+    box-shadow:0 0 30px rgba(139,92,246,.5);
+  }
+  @media (max-width:820px){
+    body{cursor:auto}
+    .cursor-dot,.cursor-ring{display:none}
+  }
+
+  /* ===== 3D background canvas ===== */
+  #bg-canvas{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    opacity:.85;
+  }
+
+  /* ===== Nav ===== */
+  nav.top{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 40px;
+    backdrop-filter:blur(14px);
+    background:linear-gradient(180deg,rgba(10,4,24,0.55),rgba(10,4,24,0));
+  }
+  nav.top .logo{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:.04em;
+    font-size:18px;
+    background:linear-gradient(120deg,#fff,#c4b5fd 70%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  nav.top ul{display:flex;gap:28px;list-style:none}
+  nav.top a{
+    font-size:14px;color:var(--muted);font-weight:500;
+    position:relative;padding:6px 2px;transition:color .2s;
+  }
+  nav.top a:hover{color:#fff}
+  nav.top a::after{
+    content:"";position:absolute;left:0;right:0;bottom:-3px;height:2px;
+    background:linear-gradient(90deg,var(--violet-1),var(--violet-2));
+    border-radius:2px;transform:scaleX(0);transform-origin:left;
+    transition:transform .3s ease;
+  }
+  nav.top a:hover::after,nav.top a.active::after{transform:scaleX(1)}
+  @media (max-width:680px){
+    nav.top{padding:14px 18px}
+    nav.top ul{gap:14px}
+    nav.top a{font-size:12px}
+  }
+
+  /* ===== Sections shared ===== */
+  main{position:relative;z-index:2}
+  section{
+    min-height:100vh;
+    padding:120px 40px 80px;
+    display:flex;flex-direction:column;justify-content:center;
+    position:relative;
+  }
+  @media (max-width:680px){section{padding:110px 20px 60px}}
+
+  .eyebrow{
+    display:inline-block;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;letter-spacing:.4em;text-transform:uppercase;
+    color:var(--neon);
+    padding:6px 14px;border-radius:999px;
+    background:var(--glass);border:1px solid var(--glass-bd);
+    margin-bottom:22px;
+  }
+
+  /* ===== HERO ===== */
+  .hero-wrap{
+    display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center;
+    max-width:1200px;margin:0 auto;width:100%;
+  }
+  @media (max-width:920px){
+    .hero-wrap{grid-template-columns:1fr;text-align:center;gap:30px}
+    .eyebrow{margin-left:auto;margin-right:auto}
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(38px,6.4vw,84px);
+    line-height:.98;font-weight:700;letter-spacing:-.02em;
+    margin-bottom:18px;
+  }
+  .hero h1 .grad{
+    background:linear-gradient(120deg,#fff 0%,#c4b5fd 40%,#8b5cf6 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    display:inline-block;
+  }
+  .hero p.sub{
+    color:var(--muted);font-size:clamp(15px,1.5vw,18px);
+    max-width:560px;line-height:1.6;margin-bottom:34px;
+  }
+  @media (max-width:920px){.hero p.sub{margin-left:auto;margin-right:auto}}
+  .cta-row{display:flex;gap:14px;flex-wrap:wrap}
+  @media (max-width:920px){.cta-row{justify-content:center}}
+
+  .btn{
+    --bg:linear-gradient(120deg,var(--violet-1),var(--violet-3));
+    position:relative;display:inline-flex;align-items:center;gap:10px;
+    padding:14px 26px;border-radius:14px;
+    font-weight:600;font-size:14px;letter-spacing:.02em;
+    background:var(--bg);color:#fff;
+    border:1px solid rgba(255,255,255,.08);
+    overflow:hidden;isolation:isolate;
+    transform-style:preserve-3d;
+    transition:transform .25s ease, box-shadow .25s ease;
+    box-shadow:0 10px 30px rgba(139,92,246,.35),inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  .btn.ghost{
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(196,181,253,.25);
+    box-shadow:none;
+  }
+  .btn:hover{
+    transform:translateY(-3px) rotateX(8deg) rotateY(-4deg);
+    box-shadow:0 18px 50px rgba(139,92,246,.55);
+  }
+  .btn::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(120px 120px at var(--mx,50%) var(--my,50%),rgba(255,255,255,.18),transparent 60%);
+    opacity:0;transition:opacity .25s;z-index:-1;
+  }
+  .btn:hover::after{opacity:1}
+
+  /* ===== Avatar visual ===== */
+  .avatar-stage{
+    position:relative;display:flex;align-items:center;justify-content:center;
+    perspective:1400px;
+    transform-style:preserve-3d;
+  }
+  .avatar-frame{
+    position:relative;width:min(420px,90%);aspect-ratio:1/1.05;
+    background:transparent;
+    border:none;
+    overflow:visible;
+    transform-style:preserve-3d;
+    will-change:transform;
+    animation:avatarIdle 9s ease-in-out infinite;
+  }
+  /* Soft ground shadow that breathes with the float */
+  .avatar-frame::before{
+    content:"";
+    position:absolute;left:50%;bottom:-6%;
+    width:60%;height:6%;
+    transform:translateX(-50%) translateZ(-40px);
+    background:radial-gradient(ellipse at center,rgba(124,58,237,.55),rgba(0,0,0,0) 70%);
+    filter:blur(14px);
+    z-index:0;
+    animation:shadowPulse 9s ease-in-out infinite;
+  }
+  /* Travelling light sweep across the doodle */
+  .avatar-frame::after{
+    content:"";
+    position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.18) 50%,transparent 70%);
+    mix-blend-mode:overlay;
+    z-index:3;
+    pointer-events:none;
+    transform:translateX(-100%);
+    animation:lightSweep 6s ease-in-out 1.2s infinite;
+    border-radius:32px;
+  }
+  .avatar-frame img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+    object-position:center;
+    z-index:2;
+    transform-style:preserve-3d;
+    filter:drop-shadow(0 20px 40px rgba(0,0,0,.45)) drop-shadow(0 0 24px rgba(139,92,246,.25));
+    animation:avatarBreathe 5s ease-in-out infinite;
+  }
+  /* Placeholder silhouette removed entirely */
+  .avatar-fallback{ display:none !important; }
+
+  @keyframes avatarIdle{
+    0%   { transform:translateY(0)     rotateY(-6deg) rotateX(2deg); }
+    25%  { transform:translateY(-10px) rotateY(0deg)  rotateX(-1deg); }
+    50%  { transform:translateY(-14px) rotateY(6deg)  rotateX(2deg); }
+    75%  { transform:translateY(-8px)  rotateY(0deg)  rotateX(3deg); }
+    100% { transform:translateY(0)     rotateY(-6deg) rotateX(2deg); }
+  }
+  @keyframes avatarBreathe{
+    0%,100% { transform:scale(1)      translateZ(0); }
+    50%     { transform:scale(1.015)  translateZ(20px); }
+  }
+  @keyframes lightSweep{
+    0%   { transform:translateX(-110%) skewX(-12deg); opacity:0; }
+    20%  { opacity:.9; }
+    60%  { opacity:.9; }
+    100% { transform:translateX(110%)  skewX(-12deg); opacity:0; }
+  }
+  @keyframes shadowPulse{
+    0%,100% { transform:translateX(-50%) translateZ(-40px) scaleX(1);   opacity:.6; }
+    50%     { transform:translateX(-50%) translateZ(-40px) scaleX(.78); opacity:.35; }
+  }
+  /* Label and uploader hidden — clean professional look */
+  .avatar-frame .label,
+  .avatar-edit{ display:none !important; }
+  .orb{
+    position:absolute;border-radius:50%;filter:blur(40px);opacity:.6;
+    pointer-events:none;
+  }
+  .orb.a{width:260px;height:260px;background:#7c3aed;top:-40px;left:-50px;animation:float 7s ease-in-out infinite}
+  .orb.b{width:200px;height:200px;background:#3b82f6;bottom:-40px;right:-30px;animation:float 9s ease-in-out infinite reverse}
+
+  @keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-14px)}
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ===== Section heading ===== */
+  .section-head{max-width:1200px;margin:0 auto 50px;width:100%}
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(32px,4.5vw,56px);font-weight:700;letter-spacing:-.02em;
+    margin-bottom:14px;
+  }
+  .section-head h2 .grad{
+    background:linear-gradient(120deg,#fff 0%,#c4b5fd 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .section-head p{color:var(--muted);max-width:620px;line-height:1.6}
+
+  /* ===== Services ===== */
+  .cards{
+    max-width:1200px;margin:0 auto;width:100%;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;
+  }
+  .card{
+    position:relative;padding:28px;border-radius:22px;
+    background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(139,92,246,.06));
+    border:1px solid var(--glass-bd);
+    backdrop-filter:blur(14px);
+    transform-style:preserve-3d;
+    transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s, border-color .3s;
+    overflow:hidden;
+    will-change:transform;
+  }
+  .card::before{
+    content:"";position:absolute;inset:-1px;border-radius:22px;
+    background:linear-gradient(140deg,transparent 50%,rgba(196,181,253,.35),transparent 80%);
+    opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  .card:hover{border-color:rgba(196,181,253,.45);box-shadow:0 20px 60px rgba(76,29,149,.45)}
+  .card:hover::before{opacity:1}
+  .card .icon{
+    width:54px;height:54px;border-radius:16px;
+    background:linear-gradient(140deg,var(--violet-1),var(--violet-3));
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+    box-shadow:0 10px 30px rgba(139,92,246,.45),inset 0 1px 0 rgba(255,255,255,.18);
+    transform:translateZ(30px);
+  }
+  .card .icon svg{width:26px;height:26px;color:#fff}
+  .card h3{
+    font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;
+    margin-bottom:10px;transform:translateZ(20px);
+  }
+  .card p{color:var(--muted);font-size:14.5px;line-height:1.6;transform:translateZ(10px)}
+  .card ul{
+    margin-top:14px;padding-left:0;list-style:none;
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .card ul li{
+    color:var(--muted);font-size:13px;display:flex;gap:8px;align-items:center;
+  }
+  .card ul li::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:linear-gradient(120deg,var(--violet-1),var(--neon));
+    box-shadow:0 0 10px var(--violet-1);
+  }
+
+  /* ===== Contact ===== */
+  .contact-wrap{
+    max-width:1100px;margin:0 auto;width:100%;
+    text-align:center;
+  }
+  .contact-wrap h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(36px,5.5vw,72px);font-weight:700;letter-spacing:-.02em;
+    margin-bottom:16px;
+  }
+  .contact-wrap h2 .grad{
+    background:linear-gradient(120deg,#fff 0%,#c4b5fd 50%,#8b5cf6 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .contact-wrap > p{
+    color:var(--muted);max-width:620px;margin:0 auto 44px;line-height:1.6;font-size:17px;
+  }
+  .contact-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;max-width:880px;margin:0 auto;
+  }
+  .contact-btn{
+    position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;padding:30px 18px;border-radius:20px;
+    background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(139,92,246,.08));
+    border:1px solid var(--glass-bd);
+    backdrop-filter:blur(14px);
+    transition:transform .3s cubic-bezier(.2,.7,.2,1), box-shadow .3s, border-color .3s;
+    transform-style:preserve-3d;
+    overflow:hidden;
+  }
+  .contact-btn:hover{
+    transform:translateY(-6px) rotateX(6deg) rotateY(-4deg) scale(1.03);
+    border-color:rgba(196,181,253,.55);
+    box-shadow:0 25px 60px rgba(139,92,246,.45);
+  }
+  .contact-btn .ic{
+    width:56px;height:56px;border-radius:18px;
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(140deg,var(--violet-1),var(--violet-3));
+    box-shadow:0 10px 30px rgba(139,92,246,.45),inset 0 1px 0 rgba(255,255,255,.18);
+    transform:translateZ(20px);
+  }
+  .contact-btn .ic svg{width:28px;height:28px;color:#fff}
+  .contact-btn .name{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16px;
+    transform:translateZ(15px);
+  }
+  .contact-btn::after{
+    content:"";position:absolute;inset:-30%;background:radial-gradient(circle,rgba(196,181,253,.18) 0%,transparent 60%);
+    opacity:0;transition:opacity .3s;pointer-events:none;
+  }
+  .contact-btn:hover::after{opacity:1}
+
+  footer{
+    text-align:center;padding:40px 20px 30px;color:var(--muted);font-size:13px;
+    border-top:1px solid rgba(196,181,253,.08);margin-top:40px;
+  }
+  footer .heart{color:var(--violet-1)}
+
+  /* Reveal — only hidden when JS+GSAP are confirmed loaded.
+     If GSAP fails (file:// blocked, ad-blocker, no internet), content shows by default. */
+  .gsap-ready .reveal{opacity:0;transform:translateY(40px) translateZ(-50px)}
+</style>
+</head>
+<body>
+  <div class="cursor-ring" id="cursorRing"></div>
+  <div class="cursor-dot" id="cursorDot"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav class="top">
+    <div class="logo">DCR<span style="color:var(--violet-1)">.</span></div>
+    <ul>
+      <li><a href="#home" class="nav-link active">Home</a></li>
+      <li><a href="#services" class="nav-link">Services</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- HOME -->
+    <section id="home" class="page">
+      <div class="hero-wrap">
+        <div class="hero">
+          <span class="eyebrow reveal">Portfolio</span>
+          <h1 class="reveal">
+            <span style="color:#fff">HEY, I'M</span><br/>
+            <span class="grad">DAN CLEEVE D.<br/>RAQUEL</span>
+          </h1>
+          <p class="sub reveal">System Integrator <span style="color:var(--violet-1)">·</span> Funnels <span style="color:var(--violet-1)">·</span> Websites &amp; Automation. I help businesses sell smarter and grow faster with tailored systems.</p>
+          <div class="cta-row reveal">
+            <a href="#services" class="btn" data-hover>
+              View My Work
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#contact" class="btn ghost" data-hover>Contact Me</a>
+          </div>
+        </div>
+        <div class="avatar-stage reveal">
+          <div class="orb a"></div>
+          <div class="orb b"></div>
+          <div class="avatar-frame" id="avatarFrame">
+            <div class="avatar-fallback" aria-hidden="true">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="g" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#c4b5fd"/>
+                    <stop offset="1" stop-color="#6d28d9"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="100" cy="80" r="44" fill="url(#g)"/>
+                <path d="M30 240 C30 170 70 140 100 140 C130 140 170 170 170 240 Z" fill="url(#g)"/>
+              </svg>
+            </div>
+            <img id="avatarImg" src="avatar.png" alt="Dan Cleeve Raquel" crossorigin="anonymous" onerror="this.style.display='none'"/>
+            <div class="label">DCR · 3D AVATAR</div>
+            <button type="button" class="avatar-edit" id="avatarEditBtn" title="Upload avatar" data-hover>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <span>Upload Avatar</span>
+            </button>
+            <input type="file" id="avatarFile" accept="image/*" style="display:none"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section id="services" class="page">
+      <div class="section-head reveal">
+        <span class="eyebrow">What I Do</span>
+        <h2>Services that <span class="grad">scale</span> your business.</h2>
+        <p>From lead-capture funnels to full POS systems — I build the rails your business runs on.</p>
+      </div>
+      <div class="cards">
+        <div class="card reveal" data-tilt data-hover>
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18l-7 8v6l-4-2v-4z"/></svg>
+          </div>
+          <h3>System Integrator Funnel</h3>
+          <p>End-to-end funnels that capture, nurture, and convert.</p>
+          <ul>
+            <li>Automations &amp; workflows</li>
+            <li>Lead capture &amp; routing</li>
+            <li>CRM integrations</li>
+          </ul>
+        </div>
+
+        <div class="card reveal" data-tilt data-hover>
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M8 21h8M12 18v3"/></svg>
+          </div>
+          <h3>Website Development</h3>
+          <p>Static and dynamic sites built with modern tooling.</p>
+          <ul>
+            <li>Responsive design</li>
+            <li>SEO &amp; performance</li>
+            <li>CMS &amp; headless setups</li>
+          </ul>
+        </div>
+
+        <div class="card reveal" data-tilt data-hover>
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          </div>
+          <h3>Automation Solutions</h3>
+          <p>Business process automation tailored to your stack.</p>
+          <ul>
+            <li>GoHighLevel (GHL)</li>
+            <li>API integrations</li>
+            <li>Workflow design</li>
+          </ul>
+        </div>
+
+        <div class="card reveal" data-tilt data-hover>
+          <div class="icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3>POS System for Businesses</h3>
+          <p>Inventory, sales, and reporting — built for real shops.</p>
+          <ul>
+            <li>Cashier · Admin · Owner roles</li>
+            <li>Inventory management</li>
+            <li>Sales tracking &amp; reports</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="page">
+      <div class="contact-wrap">
+        <span class="eyebrow reveal">Get In Touch</span>
+        <h2 class="reveal">Let's <span class="grad">work together</span>.</h2>
+        <p class="reveal">I help businesses automate, sell smarter, and grow faster. Reach out on any platform — I respond fast.</p>
+        <div class="contact-grid">
+          <a href="https://facebook.com/DanCle" target="_blank" rel="noopener" class="contact-btn reveal" data-hover data-tilt>
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.78-3.91 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.91h-2.34V22c4.78-.75 8.43-4.91 8.43-9.93z"/></svg>
+            </div>
+            <div class="name">Facebook</div>
+          </a>
+
+          <a href="https://github.com/dansoy25" target="_blank" rel="noopener" class="contact-btn reveal" data-hover data-tilt>
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.27-1.69-1.27-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.68 1.24 3.34.95.1-.74.4-1.24.73-1.53-2.55-.29-5.24-1.27-5.24-5.66 0-1.25.45-2.27 1.18-3.07-.12-.29-.51-1.46.11-3.04 0 0 .96-.31 3.15 1.17a10.9 10.9 0 0 1 5.74 0c2.19-1.48 3.15-1.17 3.15-1.17.62 1.58.23 2.75.11 3.04.74.8 1.18 1.82 1.18 3.07 0 4.4-2.69 5.36-5.25 5.65.41.36.78 1.06.78 2.13v3.16c0 .31.21.67.8.56C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+            </div>
+            <div class="name">GitHub</div>
+          </a>
+
+          <a href="https://instagram.com/dan.quel" target="_blank" rel="noopener" class="contact-btn reveal" data-hover data-tilt>
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.4a4 4 0 1 1-7.9 1 4 4 0 0 1 7.9-1z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>
+            </div>
+            <div class="name">Instagram</div>
+          </a>
+
+          <a href="https://wa.me/639939690530" target="_blank" rel="noopener" class="contact-btn reveal" data-hover data-tilt>
+            <div class="ic">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15s-.77.97-.94 1.17c-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.41-1.49-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37s-1.04 1.02-1.04 2.49 1.07 2.89 1.22 3.09c.15.2 2.1 3.21 5.09 4.5.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35zM12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.78 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.86 9.86 0 0 0 12.04 2z"/></svg>
+            </div>
+            <div class="name">WhatsApp</div>
+          </a>
+        </div>
+      </div>
+      <footer>
+        © 2026 Dan Cleeve Raquel · Built with <span class="heart">♥</span> &amp; lots of late-night coffee.
+      </footer>
+    </section>
+  </main>
+
+<script>
+/* Custom Cursor */
+(function(){
+  const ring = document.getElementById('cursorRing');
+  const dot  = document.getElementById('cursorDot');
+  let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+  addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    dot.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+  });
+  function loop(){
+    rx += (mx-rx)*0.18; ry += (my-ry)*0.18;
+    ring.style.transform = `translate(${rx}px,${ry}px) translate(-50%,-50%)`;
+    requestAnimationFrame(loop);
+  }
+  loop();
+  document.querySelectorAll('[data-hover]').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{ ring.classList.add('hover'); playHover(); });
+    el.addEventListener('mouseleave',()=>ring.classList.remove('hover'));
+  });
+})();
+
+/* Hover sound (Web Audio API) */
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } catch(e){} }
+}
+addEventListener('click', ensureAudio, { once:true });
+addEventListener('mousemove', ensureAudio, { once:true });
+function playHover(){
+  if (!audioCtx) return;
+  try {
+    const t = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(880,t);
+    o.frequency.exponentialRampToValueAtTime(1320,t+0.06);
+    g.gain.setValueAtTime(0,t);
+    g.gain.linearRampToValueAtTime(0.04,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.12);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t); o.stop(t+0.14);
+  } catch(e){}
+}
+
+/* Three.js floating particles + blobs (graceful fallback) */
+(function(){
+  if (typeof THREE === 'undefined') { console.warn('Three.js not loaded'); return; }
+  try {
+    const canvas = document.getElementById('bg-canvas');
+    const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+    renderer.setSize(innerWidth, innerHeight);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 1000);
+    camera.position.z = 80;
+    const N=700, positions=new Float32Array(N*3), colors=new Float32Array(N*3);
+    for (let i=0;i<N;i++){
+      positions[i*3]=(Math.random()-0.5)*200;
+      positions[i*3+1]=(Math.random()-0.5)*140;
+      positions[i*3+2]=(Math.random()-0.5)*200;
+      const c=new THREE.Color().setHSL(0.72+Math.random()*0.1,0.7,0.55+Math.random()*0.2);
+      colors[i*3]=c.r; colors[i*3+1]=c.g; colors[i*3+2]=c.b;
+    }
+    const geo=new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat=new THREE.PointsMaterial({size:0.6,vertexColors:true,transparent:true,opacity:0.85,depthWrite:false,blending:THREE.AdditiveBlending});
+    const points=new THREE.Points(geo,mat);
+    scene.add(points);
+    const blobs=[]; const blobColors=[0x8b5cf6,0x6d28d9,0x3b82f6];
+    for (let i=0;i<3;i++){
+      const m=new THREE.Mesh(
+        new THREE.IcosahedronGeometry(8+i*2,1),
+        new THREE.MeshBasicMaterial({color:blobColors[i],wireframe:true,transparent:true,opacity:0.18})
+      );
+      m.position.set((i-1)*40,(i%2?15:-15),-20-i*10);
+      scene.add(m); blobs.push(m);
+    }
+    let mouseX=0, mouseY=0;
+    addEventListener('mousemove', e => { mouseX=(e.clientX/innerWidth-0.5); mouseY=(e.clientY/innerHeight-0.5); });
+    addEventListener('resize', () => {
+      camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight);
+    });
+    function animate(){
+      points.rotation.y+=0.0008; points.rotation.x+=0.0003;
+      blobs.forEach((b,i)=>{ b.rotation.x+=0.002+i*0.0005; b.rotation.y+=0.0015+i*0.0007; });
+      camera.position.x+=(mouseX*10-camera.position.x)*0.04;
+      camera.position.y+=(-mouseY*8-camera.position.y)*0.04;
+      camera.lookAt(0,0,0);
+      renderer.render(scene,camera);
+      requestAnimationFrame(animate);
+    }
+    animate();
+  } catch(e){ console.warn('Three.js init failed:',e); }
+})();
+
+/* GSAP reveals — graceful fallback if libs blocked */
+if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+  document.documentElement.classList.add('gsap-ready');
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray('.reveal').forEach((el)=>{
+    gsap.to(el, {
+      opacity:1, y:0, z:0, duration:0.9, ease:'power3.out',
+      scrollTrigger:{ trigger:el, start:'top 92%', toggleActions:'play none none none' }
+    });
+  });
+  gsap.utils.toArray('section.page').forEach((sec, idx)=>{
+    if (idx === 0) return;
+    gsap.fromTo(sec,
+      { scale:0.96, rotateX:5, opacity:0.7 },
+      { scale:1, rotateX:0, opacity:1, ease:'power2.out', duration:1.2,
+        scrollTrigger:{ trigger:sec, start:'top 85%', end:'top 35%', scrub:0.6 } }
+    );
+  });
+  setTimeout(()=>{
+    document.querySelectorAll('.reveal').forEach(el=>{
+      if (getComputedStyle(el).opacity === '0') {
+        el.style.opacity='1'; el.style.transform='none';
+      }
+    });
+  }, 1800);
+} else {
+  console.warn('GSAP not loaded — content shown without scroll animations.');
+}
+
+/* Active nav link */
+const navLinks = document.querySelectorAll('.nav-link');
+const sections = ['home','services','contact'].map(id=>document.getElementById(id));
+addEventListener('scroll', () => {
+  const y = scrollY + innerHeight*0.4;
+  let active = 0;
+  sections.forEach((s,i)=>{ if (s.offsetTop<=y) active=i; });
+  navLinks.forEach((l,i)=>l.classList.toggle('active', i===active));
+});
+
+/* 3D card tilt */
+document.querySelectorAll('[data-tilt]').forEach(card=>{
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width  - 0.5;
+    const py = (e.clientY - r.top)  / r.height - 0.5;
+    card.style.transform = `perspective(900px) rotateX(${(-py*10).toFixed(2)}deg) rotateY(${(px*12).toFixed(2)}deg) translateY(-4px)`;
+    card.style.setProperty('--mx', `${(px+0.5)*100}%`);
+    card.style.setProperty('--my', `${(py+0.5)*100}%`);
+  });
+  card.addEventListener('mouseleave', ()=>{ card.style.transform=''; });
+});
+
+/* Avatar 3D parallax — applied to the stage so it composes with
+   the idle float/rotate animation running on .avatar-frame */
+(function(){
+  const stage = document.querySelector('.avatar-stage');
+  const img   = document.getElementById('avatarImg');
+  if (!stage) return;
+
+  let tx=0, ty=0, cx=0, cy=0;
+  addEventListener('mousemove', e => {
+    tx = (e.clientX/innerWidth  - 0.5);
+    ty = (e.clientY/innerHeight - 0.5);
+  });
+
+  function loop(){
+    cx += (tx - cx) * 0.08;     // smooth lerp
+    cy += (ty - cy) * 0.08;
+    const ry = (cx * 18).toFixed(2);
+    const rx = (-cy * 14).toFixed(2);
+    const tz = (Math.abs(cx)+Math.abs(cy)) * 30;
+    stage.style.transform =
+      `rotateY(${ry}deg) rotateX(${rx}deg) translateZ(${tz.toFixed(1)}px)`;
+    if (img){
+      img.style.setProperty('--gx', `${(cx*40).toFixed(1)}px`);
+      img.style.setProperty('--gy', `${(cy*30).toFixed(1)}px`);
+    }
+    requestAnimationFrame(loop);
+  }
+  loop();
+
+  // Click burst — quick pop scale
+  if (img){
+    img.style.cursor='pointer';
+    img.addEventListener('click', () => {
+      img.animate(
+        [
+          { transform:'scale(1) rotateZ(0)' },
+          { transform:'scale(1.08) rotateZ(-3deg)' },
+          { transform:'scale(.97) rotateZ(2deg)' },
+          { transform:'scale(1) rotateZ(0)' }
+        ],
+        { duration:600, easing:'cubic-bezier(.34,1.56,.64,1)' }
+      );
+    });
+  }
+})();
+
+/* Smooth anchor scroll (native) */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click', e=>{
+    const id = a.getAttribute('href');
+    if (id.length<=1) return;
+    const tgt = document.querySelector(id);
+    if (!tgt) return;
+    e.preventDefault();
+    tgt.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
+
+/* ============================================================
+   Avatar uploader — pick image, store as base64 in localStorage
+   ============================================================ */
+(function(){
+  const frame = document.getElementById('avatarFrame');
+  const img   = document.getElementById('avatarImg');
+  const btn   = document.getElementById('avatarEditBtn');
+  const file  = document.getElementById('avatarFile');
+  if (!frame || !img || !btn || !file) return;
+
+  const STORAGE_KEY     = 'dcr_portfolio_avatar';     // raw upload
+  const PROCESSED_KEY   = 'dcr_portfolio_avatar_bg';  // bg-removed version
+
+  /* ------------------------------------------------------------
+     Chroma-key: remove flat background (e.g. grey) from avatar.
+     - Samples 4 corner regions to detect dominant bg colour.
+     - Sets alpha=0 for pixels within tolerance.
+     - Feathers the edge so the cut-out isn't jagged.
+     ------------------------------------------------------------ */
+  function removeBackground(srcDataUrl){
+    return new Promise((resolve, reject) => {
+      const im = new Image();
+      im.crossOrigin = 'anonymous';
+      im.onload = () => {
+        try {
+          const w = im.naturalWidth, h = im.naturalHeight;
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          const ctx = c.getContext('2d');
+          ctx.drawImage(im, 0, 0, w, h);
+          const data = ctx.getImageData(0, 0, w, h);
+          const px = data.data;
+
+          // Sample corner blocks (8x8) to detect background colour
+          const sample = (x0, y0) => {
+            let r=0,g=0,b=0,n=0;
+            for (let y=y0;y<y0+8 && y<h;y++){
+              for (let x=x0;x<x0+8 && x<w;x++){
+                const i = (y*w + x)*4;
+                r+=px[i]; g+=px[i+1]; b+=px[i+2]; n++;
+              }
+            }
+            return [r/n, g/n, b/n];
+          };
+          const corners = [
+            sample(0,0),
+            sample(w-8,0),
+            sample(0,h-8),
+            sample(w-8,h-8)
+          ];
+          const bg = corners.reduce((a,c)=>[a[0]+c[0],a[1]+c[1],a[2]+c[2]],[0,0,0])
+                            .map(v=>v/corners.length);
+
+          const HARD = 38;   // fully transparent under this distance
+          const SOFT = 70;   // feathered between HARD and SOFT
+          for (let i=0;i<px.length;i+=4){
+            const dr = px[i]   - bg[0];
+            const dg = px[i+1] - bg[1];
+            const db = px[i+2] - bg[2];
+            const d  = Math.sqrt(dr*dr + dg*dg + db*db);
+            if (d < HARD) {
+              px[i+3] = 0;
+            } else if (d < SOFT) {
+              const t = (d - HARD) / (SOFT - HARD);
+              px[i+3] = Math.round(px[i+3] * t);
+            }
+          }
+          ctx.putImageData(data, 0, 0);
+          resolve(c.toDataURL('image/png'));
+        } catch(err){ reject(err); }
+      };
+      im.onerror = reject;
+      im.src = srcDataUrl;
+    });
+  }
+
+  function setImage(dataUrl){
+    img.src = dataUrl;
+    img.style.display = 'block';
+    frame.classList.add('has-img');
+  }
+
+  async function processAndSet(rawDataUrl){
+    try { localStorage.setItem(STORAGE_KEY, rawDataUrl); } catch(_){}
+    try {
+      const cleaned = await removeBackground(rawDataUrl);
+      setImage(cleaned);
+      try { localStorage.setItem(PROCESSED_KEY, cleaned); } catch(_){}
+    } catch(err){
+      console.warn('Background removal failed, using original:', err);
+      setImage(rawDataUrl);
+    }
+  }
+
+  const DISK_KEY = 'dcr_portfolio_avatar_disk_v1';  // processed avatar.png
+
+  // Restore previously-processed avatar (instant) — else process the raw one
+  try {
+    const cached  = localStorage.getItem(PROCESSED_KEY) ||
+                    localStorage.getItem(DISK_KEY);
+    const rawSaved = localStorage.getItem(STORAGE_KEY);
+    if (cached) {
+      setImage(cached);
+    } else if (rawSaved) {
+      processAndSet(rawSaved);
+    }
+  } catch(e){}
+
+  // When avatar.png loads from disk, chroma-key it on the fly
+  // so the gray background disappears for every visitor on GitHub.
+  let diskProcessed = false;
+  img.addEventListener('load', async () => {
+    if (img.naturalWidth > 0) frame.classList.add('has-img');
+    if (diskProcessed) return;
+    if (!img.src || img.src.startsWith('data:')) return; // already processed
+    diskProcessed = true;
+    try {
+      const cleaned = await removeBackground(img.src);
+      img.src = cleaned;
+      try { localStorage.setItem(DISK_KEY, cleaned); } catch(_){}
+    } catch(err){
+      console.warn('Disk avatar chroma-key skipped:', err);
+    }
+  });
+
+  btn.addEventListener('click', () => file.click());
+
+  file.addEventListener('change', () => {
+    const f = file.files && file.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = e => processAndSet(e.target.result);
+    reader.readAsDataURL(f);
+  });
+
+  /* ------------------------------------------------------------
+     One-time exporter — saves the cached avatar to a real PNG
+     file you can commit alongside index.html on GitHub.
+     Shows a floating "Save avatar.png" pill only when:
+       (1) localStorage has the processed avatar, AND
+       (2) avatar.png couldn't be loaded from disk.
+     After you commit avatar.png next to index.html, the image
+     loads naturally and the pill stops appearing.
+     ------------------------------------------------------------ */
+  function maybeShowExporter(){
+    const cached = (() => { try { return localStorage.getItem(PROCESSED_KEY)
+                                       || localStorage.getItem(STORAGE_KEY); }
+                           catch(_){ return null; } })();
+    if (!cached) return;
+    if (img.complete && img.naturalWidth > 0) return; // disk file already loads
+
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.textContent = '⬇  Save avatar.png';
+    pill.title = 'Download the cleaned avatar so you can commit it to GitHub';
+    Object.assign(pill.style, {
+      position:'fixed', right:'22px', bottom:'22px', zIndex:9999,
+      padding:'12px 18px', borderRadius:'999px', cursor:'pointer',
+      border:'1px solid rgba(196,181,253,.45)',
+      background:'linear-gradient(135deg,#7c3aed,#3b82f6)',
+      color:'#fff', fontWeight:'600', letterSpacing:'.02em',
+      fontFamily:'inherit', fontSize:'13px',
+      boxShadow:'0 12px 30px rgba(76,29,149,.45)',
+      backdropFilter:'blur(10px)'
+    });
+    pill.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = cached;
+      a.download = 'avatar.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      pill.textContent = '✓ Downloaded — commit it next to index.html';
+      pill.disabled = true;
+      setTimeout(()=>pill.remove(), 4000);
+    });
+    document.body.appendChild(pill);
+  }
+  // Wait a beat for the disk-image load attempt to settle
+  setTimeout(maybeShowExporter, 800);
+})();
+</script>
+</body>
+</html>
